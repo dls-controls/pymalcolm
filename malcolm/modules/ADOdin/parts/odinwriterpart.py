@@ -359,7 +359,7 @@ class OdinWriterPart(builtin.parts.ChildPart):
         )
         futures = child.put_attribute_values_async(
             dict(
-                numCapture=steps_to_do,
+                numCapture=generator.size,
                 filePath=file_dir + os.sep,
                 fileName=raw_file_basename,
             )

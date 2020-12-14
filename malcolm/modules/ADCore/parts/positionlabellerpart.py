@@ -83,7 +83,7 @@ class PositionLabellerPart(builtin.parts.ChildPart):
         futures += child.put_attribute_values_async(
             dict(enableCallbacks=True, idStart=id_start)
         )
-        self.steps_up_to = completed_steps + steps_to_do
+        self.steps_up_to = generator.size
         xml, self.end_index = self._make_xml(completed_steps)
         # Wait for the previous puts to finish
         context.wait_all_futures(futures)
