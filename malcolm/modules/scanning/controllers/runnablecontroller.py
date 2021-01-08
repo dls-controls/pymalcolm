@@ -535,7 +535,7 @@ class RunnableController(builtin.controllers.ManagerController):
         )
         # Update the completed and configured steps
         self.configured_steps.set_value(steps_to_do)
-        self.completed_steps.meta.display.set_limitHigh(steps_to_do)
+        self.completed_steps.meta.display.set_limitHigh(params.generator.size)
         # Reset the progress of all child parts
         self.progress_updates = {}
         self.resume_queue = Queue()
