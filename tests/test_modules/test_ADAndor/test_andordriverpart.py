@@ -115,6 +115,7 @@ class TestAndorDetectorDriverPart(ChildTestCase):
             self.context,
             completed_steps,
             steps_to_do,
+            steps_to_do,
             duration,
             part_info,
             exposure=0.05,
@@ -130,6 +131,7 @@ class TestAndorDetectorDriverPart(ChildTestCase):
         super_setup_detector_mock.assert_called_once_with(
             self.context,
             completed_steps,
+            steps_to_do,
             steps_to_do,
             duration,
             part_info,
@@ -159,7 +161,7 @@ class TestAndorDetectorDriverPart(ChildTestCase):
         )
 
         self.andor_driver_part.setup_detector(
-            self.context, completed_steps, steps_to_do, duration, part_info
+            self.context, completed_steps, steps_to_do, steps_to_do, duration, part_info
         )
 
         # Check method calls
@@ -172,6 +174,7 @@ class TestAndorDetectorDriverPart(ChildTestCase):
         super_setup_detector_mock.assert_called_once_with(
             self.context,
             completed_steps,
+            steps_to_do,
             steps_to_do,
             duration,
             part_info,
@@ -204,6 +207,7 @@ class TestAndorDetectorDriverPart(ChildTestCase):
             self.context,
             completed_steps,
             steps_to_do,
+            steps_to_do,
             duration,
             part_info,
             exposure=0.25,
@@ -219,6 +223,7 @@ class TestAndorDetectorDriverPart(ChildTestCase):
         super_setup_detector_mock.assert_called_once_with(
             self.context,
             completed_steps,
+            steps_to_do,
             steps_to_do,
             duration,
             part_info,
@@ -248,7 +253,7 @@ class TestAndorDetectorDriverPart(ChildTestCase):
         )
 
         self.andor_driver_part.setup_detector(
-            self.context, completed_steps, steps_to_do, duration, part_info
+            self.context, completed_steps, steps_to_do, steps_to_do, duration, part_info
         )
 
         # Check method calls
@@ -261,6 +266,7 @@ class TestAndorDetectorDriverPart(ChildTestCase):
         super_setup_detector_mock.assert_called_once_with(
             self.context,
             completed_steps,
+            steps_to_do,
             steps_to_do,
             duration,
             part_info,

@@ -68,7 +68,7 @@ class TestXmap3DetectorDriverPart(ChildTestCase):
             completed_steps,
             steps_to_do,
             part_info,
-            generator=MagicMock(duration=1.0),
+            generator=MagicMock(duration=1.0, size=steps_to_do),
             fileDir="/tmp",
         )
         assert self.child.handled_requests.mock_calls == [
@@ -83,9 +83,9 @@ class TestXmap3DetectorDriverPart(ChildTestCase):
             call.put("pixelsPerBuffer", 1),
             call.put("pixelsPerRun", steps_to_do),
             call.put("presetMode", "No preset"),
+            call.put("attributesFile", "Z:\\mri-attributes.xml"),
             call.post("start"),
             call.when_value_matches("acquiring", True, None),
-            call.put("attributesFile", "Z:\\mri-attributes.xml"),
         ]
         with open("/tmp/mri-attributes.xml") as f:
             actual_xml = f.read().replace(">", ">\n")

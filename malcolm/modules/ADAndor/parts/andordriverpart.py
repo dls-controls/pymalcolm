@@ -39,6 +39,7 @@ class AndorDriverPart(ADCore.parts.DetectorDriverPart):
         context: Context,
         completed_steps: scanning.hooks.ACompletedSteps,
         steps_to_do: scanning.hooks.AStepsToDo,
+        steps_in_run: scanning.hooks.AStepsInRun,
         duration: float,
         part_info: scanning.hooks.APartInfo,
         **kwargs: Any,
@@ -77,7 +78,13 @@ class AndorDriverPart(ADCore.parts.DetectorDriverPart):
         kwargs["exposure"] = exposure
 
         super().setup_detector(
-            context, completed_steps, steps_to_do, duration, part_info, **kwargs
+            context,
+            completed_steps,
+            steps_to_do,
+            steps_in_run,
+            duration,
+            part_info,
+            **kwargs,
         )
 
         child.acquirePeriod.put_value(period)
