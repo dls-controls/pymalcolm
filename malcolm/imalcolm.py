@@ -45,6 +45,12 @@ def parse_args():
         "-c",
         help="Add a client to given server, like ws://localhost:8008 or pva",
     )
+    parser.add_argument(
+        "--debug",
+        help="Set the level of console logger to DEBUG. Superceded by logcfg.",
+        action="store_true",
+        default=False,
+    )
     parser.add_argument("--logcfg", help="Logging dict config in JSON or YAML file")
     parser.add_argument(
         "yaml", nargs="?", help="The YAML file containing the blocks to be loaded"
@@ -71,7 +77,7 @@ def make_logging_config(args):
         "handlers": {
             "console": {
                 "class": "logging.StreamHandler",
-                "level": "WARNING",
+                "level": "DEBUG" if args.debug else "WARNING",
                 "formatter": "simple",
                 "stream": "ext://sys.stdout",
             },
