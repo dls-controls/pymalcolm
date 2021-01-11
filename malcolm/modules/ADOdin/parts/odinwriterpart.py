@@ -310,10 +310,9 @@ class OdinWriterPart(builtin.parts.ChildPart):
         registrar.report(scanning.hooks.ConfigureHook.create_info(self.on_configure))
         # Hooks
         registrar.hook(scanning.hooks.ConfigureHook, self.on_configure)
-        registrar.hook(
-            (scanning.hooks.PostRunArmedHook, scanning.hooks.SeekHook), self.on_seek
-        )
+        registrar.hook(scanning.hooks.SeekHook, self.on_seek)
         registrar.hook(scanning.hooks.RunHook, self.on_run)
+        registrar.hook(scanning.hooks.PostRunArmedHook, self.on_post_run_armed)
         registrar.hook(scanning.hooks.PostRunReadyHook, self.on_post_run_ready)
         registrar.hook(scanning.hooks.AbortHook, self.on_abort)
         registrar.hook(scanning.hooks.PauseHook, self.on_pause)
@@ -419,6 +418,12 @@ class OdinWriterPart(builtin.parts.ChildPart):
             self.done_when_reaches,
             event_timeout=self.exposure_time + FRAME_TIMEOUT,
         )
+
+    @add_call_types
+    def on_post_run_armed(
+        self, context: scanning.hooks.AContext, steps_to_do: scanning.hooks.AStepsToDo,
+    ) -> None:
+        self.done_when_reaches += steps_to_do
 
     @add_call_types
     def on_post_run_ready(self, context: scanning.hooks.AContext) -> None:

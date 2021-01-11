@@ -98,6 +98,7 @@ class DetectorDriverPart(builtin.parts.ChildPart):
         context: Context,
         completed_steps: scanning.hooks.ACompletedSteps,
         steps_to_do: scanning.hooks.AStepsToDo,
+        steps_in_run: scanning.hooks.AStepsInRun,
         duration: float,
         part_info: scanning.hooks.APartInfo,
         **kwargs: Any,
@@ -106,12 +107,12 @@ class DetectorDriverPart(builtin.parts.ChildPart):
         if completed_steps == 0:
             # This is an initial configure, so reset arrayCounter to 0
             array_counter = 0
-            self.done_when_reaches = steps_to_do
+            self.done_when_reaches = steps_in_run
         else:
             # This is rewinding or setting up for another batch,
             # skip to a uniqueID that has not been produced yet
             array_counter = self.done_when_reaches
-            self.done_when_reaches += steps_to_do
+            self.done_when_reaches += steps_in_run
         self.uniqueid_offset = completed_steps - array_counter
         for k, v in dict(
             arrayCounter=array_counter,
@@ -150,13 +151,14 @@ class DetectorDriverPart(builtin.parts.ChildPart):
         child.arrayCounterReadback.subscribe_value(
             self.update_completed_steps, registrar
         )
-        # If no new frames produced in event_timeout seconds, consider scan dead
-        context.wait_all_futures(self.start_future, event_timeout=event_timeout)
+
         # Now wait to make sure any update_completed_steps come in. Give
         # it 5 seconds to timeout just in case there are any stray frames that
         # haven't made it through yet
         child.when_value_matches(
-            "arrayCounterReadback", self.done_when_reaches, timeout=DEFAULT_TIMEOUT
+            "arrayCounterReadback",
+            self.done_when_reaches,
+            event_timeout=event_timeout,
         )
 
     def abort_detector(self, context: Context) -> None:
@@ -220,15 +222,12 @@ class DetectorDriverPart(builtin.parts.ChildPart):
         # Hooks
         registrar.hook(scanning.hooks.ReportStatusHook, self.on_report_status)
         registrar.hook(
-            (
-                scanning.hooks.ConfigureHook,
-                scanning.hooks.PostRunArmedHook,
-                scanning.hooks.SeekHook,
-            ),
+            (scanning.hooks.ConfigureHook, scanning.hooks.SeekHook,),
             self.on_configure,
             self.configure_args_with_exposure,
         )
         registrar.hook(scanning.hooks.RunHook, self.on_run)
+        registrar.hook(scanning.hooks.PostRunArmedHook, self.on_post_run_armed)
         registrar.hook(
             (scanning.hooks.PauseHook, scanning.hooks.AbortHook), self.on_abort
         )
@@ -317,6 +316,7 @@ class DetectorDriverPart(builtin.parts.ChildPart):
         # If detector is hardware triggered we can configure the detector for all frames
         # now, rather than configuring and arming for each inner scan, and send the
         # triggers for one inner scan in each run
+        steps_in_run = steps_to_do
         if self.is_hardware_triggered:
             steps_to_do = generator.size
 
@@ -324,6 +324,7 @@ class DetectorDriverPart(builtin.parts.ChildPart):
             context,
             completed_steps,
             steps_to_do,
+            steps_in_run,
             generator.duration,
             part_info,
             **kwargs,
@@ -356,9 +357,18 @@ class DetectorDriverPart(builtin.parts.ChildPart):
             # Start now if we are software triggered
             self.arm_detector(context)
         assert self.registrar, "No assigned registrar"
+
+        self.log.debug("Done when reaches: %d", self.done_when_reaches)
         self.wait_for_detector(
             context, self.registrar, event_timeout=self.frame_timeout
         )
+
+    @add_call_types
+    def on_post_run_armed(
+        self, context: scanning.hooks.AContext, steps_to_do: scanning.hooks.AStepsToDo,
+    ) -> None:
+        if self.is_hardware_triggered:
+            self.done_when_reaches += steps_to_do
 
     @add_call_types
     def on_abort(self, context: scanning.hooks.AContext) -> None:

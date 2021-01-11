@@ -109,6 +109,8 @@ with Anno("Number of steps already completed"):
     ACompletedSteps = int
 with Anno("Number of steps we should configure for"):
     AStepsToDo = int
+with Anno("Number of steps each run"):
+    AStepsInRun = int
 
 
 class PreConfigureHook(ControllerHook[None]):
