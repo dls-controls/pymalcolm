@@ -31,7 +31,7 @@ class PositionLabellerPart(builtin.parts.ChildPart):
     # If we are currently loading then block loading more points
     loading = None
     # When arrayCounter gets to here we are done
-    done_when_reaches = None
+    done_when_reaches = 0
 
     def setup(self, registrar: PartRegistrar) -> None:
         super().setup(registrar)
