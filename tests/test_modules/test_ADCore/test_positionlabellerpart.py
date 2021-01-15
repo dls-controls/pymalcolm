@@ -56,6 +56,7 @@ class TestPositionLabellerPart(ChildTestCase):
             call.post("start"),
         ]
         assert self.o.done_when_reaches == 34
+        assert self.o.steps_up_to == generator.size
 
     def test_run(self):
         # Say that we've returned from start
@@ -63,6 +64,11 @@ class TestPositionLabellerPart(ChildTestCase):
         self.o.start_future.set_result(None)
         self.o.on_run(self.context)
         assert self.child.handled_requests.mock_calls == []
+
+    def test_post_run_ready(self):
+        self.o.done_when_reaches = 100
+        self.o.on_post_run_armed(self.context, steps_to_do=100)
+        assert self.o.done_when_reaches == 200
 
     def test_load_more_positions(self):
         child = MagicMock()

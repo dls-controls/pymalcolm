@@ -443,6 +443,12 @@ class TestHDFWriterPart(ChildTestCase):
         self.o.on_reset(self.context)
         assert not os.path.isfile(fname)
 
+    def test_post_run_armed(self):
+        self.o = HDFWriterPart(name="m", mri="BLOCK:HDF5")
+        self.o.done_when_reaches = 100
+        self.o.on_post_run_armed(self.context, steps_to_do=100)
+        assert self.o.done_when_reaches == 200
+
     def test_check_xml_is_valid_method_succeeds_for_valid_value(self):
         self.o = HDFWriterPart(name="m", mri="BLOCK:HDF5")
         child = MagicMock(name="child_mock")

@@ -134,6 +134,11 @@ class TestOdinWriterPart(ChildTestCase):
             formatName="odin2",
         )
 
+    def test_post_run_armed(self):
+        self.o.done_when_reaches = 100
+        self.o.on_post_run_armed(self.context, steps_to_do=100)
+        assert self.o.done_when_reaches == 200
+
     @staticmethod
     def make_test_data():
         for i in range(6):

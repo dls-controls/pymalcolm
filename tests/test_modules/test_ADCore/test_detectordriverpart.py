@@ -154,11 +154,90 @@ class TestDetectorDriverPart(ChildTestCase):
         assert self.o.registrar.report.call_count == 2
         assert self.o.registrar.report.call_args[0][0].steps == 0
 
+    def test_hardware_triggered_run(self):
+        self.o.registrar = MagicMock()
+        # This would have been done by configure
+        self.o.is_hardware_triggered = True
+        self.o.on_run(self.context)
+        # Should not call start when hardware triggered
+        assert self.child.handled_requests.mock_calls == [
+            call.when_value_matches("arrayCounterReadback", 0, None),
+        ]
+        assert self.o.registrar.report.call_count == 2
+        assert self.o.registrar.report.call_args[0][0].steps == 0
+
+    def test_post_run_armed(self):
+        # This would have been done by configure
+        self.o.is_hardware_triggered = False
+        self.o.done_when_reaches = 100
+        self.o.on_post_run_armed(self.context, steps_to_do=100)
+        assert self.o.done_when_reaches == 100
+
+    def test_hardware_triggered_post_run_armed(self):
+        # This would have been done by configure
+        self.o.is_hardware_triggered = True
+        self.o.done_when_reaches = 100
+        self.o.on_post_run_armed(self.context, steps_to_do=100)
+        assert self.o.done_when_reaches == 200
+
     def test_abort(self):
         self.o.on_abort(self.context)
         assert self.child.handled_requests.mock_calls == [
             call.post("stop"),
             call.when_value_matches("acquiring", False, None),
+        ]
+
+
+class TestDetectorDriverPartNestedConfigure(TestDetectorDriverPart):
+    def setUp(self):
+        super().setUp()
+        # In this case we only move x and expect energy to be moved in between runs
+        outer = LineGenerator("energy", "keV", 10.0, 11.0, 5)
+        self.steps_to_do = 10
+        inner = LineGenerator("x", "mm", 0.0, 0.5, self.steps_to_do)
+        self.generator = CompoundGenerator([outer, inner], [], [], 0.1)
+        self.generator.prepare()
+        self.completed_steps = 0
+        self.info = ExposureDeadtimeInfo(0.01, 1000, 0.0)
+        self.part_info = dict(anyname=[self.info])
+
+    def configure(self):
+        self.o.on_configure(
+            self.context,
+            self.completed_steps,
+            self.steps_to_do,
+            self.part_info,
+            self.generator,
+            fileDir="/tmp",
+            exposure=self.info.calculate_exposure(self.generator.duration),
+        )
+
+    def test_nested_configure(self):
+        self.set_attributes(self.child, triggerMode="Internal")
+        self.configure()
+        # When not hardware triggered we set numImages for the inner scan only
+        assert self.child.handled_requests.mock_calls == [
+            call.put("arrayCallbacks", True),
+            call.put("arrayCounter", 0),
+            call.put("exposure", 0.1 - 0.01 - 0.0001),
+            call.put("imageMode", "Multiple"),
+            call.put("numImages", 10),
+            call.put("acquirePeriod", 0.1 - 0.0001),
+        ]
+
+    def test_nested_hardware_triggered_configure(self):
+        self.set_attributes(self.child, triggerMode="External")
+        self.configure()
+        # When hardware triggered we set numImages to the total frames and call start
+        assert self.child.handled_requests.mock_calls == [
+            call.put("arrayCallbacks", True),
+            call.put("arrayCounter", 0),
+            call.put("exposure", 0.1 - 0.01 - 0.0001),
+            call.put("imageMode", "Multiple"),
+            call.put("numImages", 50),
+            call.put("acquirePeriod", 0.1 - 0.0001),
+            call.post("start"),
+            call.when_value_matches("acquiring", True, None),
         ]
 
 
