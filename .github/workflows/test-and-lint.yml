@@ -7,7 +7,7 @@ env:
   # EPICS Base version for system block IOC
   EPICS_BASE_VER: R3.14.12.7
   # EPICS Base install location
-  EPICS_BASE: ${{ GITHUB_WORKSPACE }}/epics/epics_base
+  EPICS_BASE: ${{ env.GITHUB_WORKSPACE }}/epics/epics_base
 
 jobs:
 
