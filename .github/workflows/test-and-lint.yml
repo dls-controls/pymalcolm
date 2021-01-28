@@ -42,7 +42,6 @@ jobs:
         tar -zxf ${EPICS_BASE_VER}.tar.gz
         ln -s epics-base-${EPICS_BASE_VER} epics_base
         make -sj -C epics_base/
-        echo "EPICS_BASE=`pwd`/epics_base/" >> $GITHUB_ENV
         cd -
     - name: Environment information
       run: |
@@ -58,7 +57,7 @@ jobs:
     - name: Install dependencies
       run: |
         # Install pipenv
-        python -m pip install --upgrade pipenv wheel
+        python -m pip install --upgrade pip pipenv wheel
         # Skip lock as it contains hashes from the subset installed on DLS PyPI
         pipenv install --skip-lock --dev
         pipenv run pip list installed
