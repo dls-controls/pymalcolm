@@ -6,8 +6,6 @@ on: [push, pull_request]
 env:
   # EPICS Base version for system block IOC
   EPICS_BASE_VER: R3.14.12.7
-  # EPICS Base install location
-  EPICS_BASE: ${{ env.GITHUB_WORKSPACE }}/epics/epics_base
 
 jobs:
 
@@ -19,6 +17,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      env:
+        # EPICS Base install location
+        EPICS_BASE: ${{ env.GITHUB_WORKSPACE }}/epics/epics_base
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -54,7 +55,7 @@ jobs:
         sudo ip addr del $IP/16 dev docker0
         sudo ip addr add $IP/16 broadcast + dev docker0
         ifconfig
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
         # Install pipenv
         python -m pip install --upgrade pip pipenv wheel
