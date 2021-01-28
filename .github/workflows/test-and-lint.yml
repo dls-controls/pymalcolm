@@ -36,7 +36,7 @@ jobs:
         wget -nv https://github.com/epics-base/epics-base/archive/${EPICS_BASE_VER}.tar.gz
         tar -zxf ${EPICS_BASE_VER}.tar.gz
         ln -s epics-base-${EPICS_BASE_VER} ${EPICS_BASE_DIR}
-        make -sj -C {EPICS_BASE_DIR}/
+        make -sj -C ${EPICS_BASE_DIR}/
     - name: Set EPICS Base path
       run: echo "EPICS_BASE=`pwd`${EPICS_BASE_DIR}" >> $GITHUB_ENV
     - name: Environment information
