@@ -7,7 +7,7 @@ env:
   # EPICS Base version for system block IOC
   EPICS_BASE_VER: R3.14.12.7
   # EPICS Base install location
-  EPICS_BASE: ~/epics/epics_base
+  EPICS_BASE: ${{ GITHUB_WORKSPACE }}/epics/epics_base
 
 jobs:
 
@@ -36,13 +36,13 @@ jobs:
     - name: Install EPICS Base
       if: steps.epics-base-cache.outputs.cache-hit != 'true'
       run: |
-        mkdir ~/epics
-        cd ~/epics
+        mkdir epics
+        cd epics
         wget -nv https://github.com/epics-base/epics-base/archive/${EPICS_BASE_VER}.tar.gz
         tar -zxf ${EPICS_BASE_VER}.tar.gz
         ln -s epics-base-${EPICS_BASE_VER} epics_base
         make -sj -C epics_base/
-        cd -
+        cd ..
     - name: Environment information
       run: |
         env
