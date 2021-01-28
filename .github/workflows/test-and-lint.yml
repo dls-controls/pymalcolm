@@ -31,7 +31,7 @@ jobs:
       uses: actions/cache@v2
       id: epics-base-cache
       with:
-        path: {{ env.EPICS_BASE }}
+        path: ${{ env.EPICS_BASE }}
         key: ${{ runner.os }}-${{ env.EPICS_BASE_VER }}
     - name: Install EPICS Base
       if: steps.epics-base-cache.outputs.cache-hit != 'true'
