@@ -1,13 +1,13 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: Run tests and linter
 
 # Trigger action for every push/PR
 on: [push, pull_request]
 
 env:
+  # EPICS Base version for system block IOC
   EPICS_BASE_VER: R3.14.12.7
+  # EPICS Base install location
+  EPICS_BASE: ~/epics/epics_base
 
 jobs:
 
@@ -27,16 +27,23 @@ jobs:
       run: |
         git config --global user.email "MrMalcolm@github.com"
         git config --global user.name "Mr. Malcolm"
+    - name: Cache EPICS Base
+      uses: actions/cache@v2
+      id: epics-base-cache
+      with:
+        path: {{ env.EPICS_BASE }}
+        key: ${{ runner.os }}-${{ env.EPICS_BASE_VER }}
     - name: Install EPICS Base
+      if: steps.epics-base-cache.outputs.cache-hit != 'true'
       run: |
-        mkdir epics
-        cd epics
+        mkdir ~/epics
+        cd ~/epics
         wget -nv https://github.com/epics-base/epics-base/archive/${EPICS_BASE_VER}.tar.gz
         tar -zxf ${EPICS_BASE_VER}.tar.gz
         ln -s epics-base-${EPICS_BASE_VER} epics_base
         make -sj -C epics_base/
         echo "EPICS_BASE=`pwd`/epics_base/" >> $GITHUB_ENV
-        cd ..
+        cd -
     - name: Environment information
       run: |
         env
