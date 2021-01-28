@@ -43,6 +43,6 @@ ipython = "*"
 
 [scripts]
 # Put coverage here so we don't interfere with debugging in the IDE
-tests = "python -m pytest --cov=malcolm --cov-fail-under=90 --cov-report term --log-format='%(asctime)s.%(msecs)03d %(filename)-25s %(lineno)4d %(levelname)-8s %(message)s' --log-date-format='%Y-%m-%d %H:%M:%S' tests"
+tests = "python -m pytest --cov=malcolm --cov-fail-under=90 --cov-report term --cov-report xml --log-format='%(asctime)s.%(msecs)03d %(filename)-25s %(lineno)4d %(levelname)-8s %(message)s' --log-date-format='%Y-%m-%d %H:%M:%S' tests"
 docs = "sphinx-build -b html docs docs/html"
 flake8 = "flake8 malcolm tests --benchmark"
