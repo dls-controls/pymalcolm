@@ -8,18 +8,16 @@ env:
   EPICS_BASE_VER: R3.14.12.7
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.7]
-
+    env:
+      # EPICS Base install location
+      EPICS_BASE: ${{ env.GITHUB_WORKSPACE }}/epics/epics_base
     steps:
     - uses: actions/checkout@v2
-      env:
-        # EPICS Base install location
-        EPICS_BASE: ${{ env.GITHUB_WORKSPACE }}/epics/epics_base
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
