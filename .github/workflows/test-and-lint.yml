@@ -28,7 +28,6 @@ jobs:
         git config --global user.email "MrMalcolm@github.com"
         git config --global user.name "Mr. Malcolm"
     - name: Install EPICS Base
-      env: 
       run: |
         mkdir epics
         cd epics
