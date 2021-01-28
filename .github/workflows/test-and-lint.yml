@@ -35,9 +35,9 @@ jobs:
         tar -zxf ${EPICS_BASE_VER}.tar.gz
         ln -s epics-base-${EPICS_BASE_VER} epics_base
         make -sj -C epics_base/
-        EPICS_BASE=`pwd`/epics_base/
+        echo "EPICS_BASE=`pwd`/epics_base/" >> $GITHUB_ENV
         cd ..
-    - name: Run info
+    - name: Run information
       run: |
         env
         pwd
@@ -59,11 +59,11 @@ jobs:
         # ls -al ${VIRTUAL_ENV}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages
         # ls -al ${VIRTUAL_ENV}/bin
         python setup.py bdist_wheel
-    - name: Run flake8
+    - name: flake8
       run: pipenv run flake8
-    - name: Run tests
+    - name: Pytest
       run: pipenv run tests
-    - name: Run docs
+    - name: Docs
       run: pipenv run docs
     - name: Coverage
       run: codecov --token=0fc7b8ca-201c-4f0f-938b-ac26f79d26ed
