@@ -38,7 +38,7 @@ jobs:
         ln -s epics-base-${EPICS_BASE_VER} ${EPICS_BASE_DIR}
         make -sj -C ${EPICS_BASE_DIR}/
     - name: Set EPICS Base path
-      run: echo "EPICS_BASE=`pwd`${EPICS_BASE_DIR}" >> $GITHUB_ENV
+      run: echo "EPICS_BASE=`pwd`/${EPICS_BASE_DIR}" >> $GITHUB_ENV
     - name: Environment information
       run: |
         pwd
