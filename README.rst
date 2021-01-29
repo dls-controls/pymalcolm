@@ -44,7 +44,7 @@ License
 APACHE License. (see `LICENSE`_)
 
 
-.. |build_status| image:: https://github.com/dls-controls/pymalcolm/workflows/Run%20tests%20and%20linter/badge.svg?branch=master
+.. |build_status| image:: https://github.com/dls-controls/pymalcolm/workflows/GitHub%20Actions/badge.svg?branch=master
     :target: https://github.com/dls-controls/pymalcolm/actions
     :alt: Build Status
 
