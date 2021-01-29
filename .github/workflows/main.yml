@@ -42,6 +42,7 @@ jobs:
     - name: Environment information
       run: |
         pwd
+        ls -l ${EPICS_BASE_DIR}
         env
         ifconfig
         IP=$(ip addr show docker0 | grep -Po 'inet \K[\d.]+')
