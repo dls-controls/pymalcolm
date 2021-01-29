@@ -44,8 +44,8 @@ License
 APACHE License. (see `LICENSE`_)
 
 
-.. |build_status| image:: https://travis-ci.org/dls-controls/pymalcolm.svg?branch=master
-    :target: https://travis-ci.org/dls-controls/pymalcolm
+.. |build_status| image:: https://github.com/dls-controls/pymalcolm/workflows/Run%20tests%20and%20linter/badge.svg?branch=master
+    :target: https://github.com/dls-controls/pymalcolm/actions
     :alt: Build Status
 
 .. |coverage| image:: https://codecov.io/gh/dls-controls/pymalcolm/branch/master/graph/badge.svg
