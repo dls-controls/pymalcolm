@@ -29,7 +29,7 @@ jobs:
       id: epics-base-cache
       with:
         path: ${{ env.EPICS_BASE_DIR }}
-        key: epics-base-${{ runner.os }}-${{ env.EPICS_BASE_VER }}
+        key: epics_base-${{ runner.os }}-${{ env.EPICS_BASE_VER }}
     - name: Install EPICS Base
       if: steps.epics-base-cache.outputs.cache-hit != 'true'
       run: |
