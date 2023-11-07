@@ -32,6 +32,8 @@ with Anno("Which user program to run for each point"):
     AUserPrograms = Union[Array[np.int32]]
 with Anno("The position the axis should be at for each point in the scan"):
     ADemandTrajectory = Union[Array[np.float64]]
+with Anno("The Velocity the axis should be at for each point in the scan"):
+    ADemandVelocity = Union[Array[np.float64]]
 
 # Pull re-used annotypes into our namespace in case we are subclassed
 APartName = builtin.parts.APartName
@@ -100,19 +102,28 @@ class PmacTrajectoryPart(builtin.parts.ChildPart):
         velocityMode: AVelocityMode = None,
         userPrograms: AUserPrograms = None,
         a: ADemandTrajectory = None,
+        a_vel: ADemandVelocity = None,
         b: ADemandTrajectory = None,
+        b_vel: ADemandVelocity = None,
         c: ADemandTrajectory = None,
+        c_vel: ADemandVelocity = None,
         u: ADemandTrajectory = None,
+        u_vel: ADemandVelocity = None,
         v: ADemandTrajectory = None,
+        v_vel: ADemandVelocity = None,
         w: ADemandTrajectory = None,
+        w_vel: ADemandVelocity = None,
         x: ADemandTrajectory = None,
+        x_vel: ADemandVelocity = None,
         y: ADemandTrajectory = None,
+        y_vel: ADemandVelocity = None,
         z: ADemandTrajectory = None,
+        z_vel: ADemandVelocity = None,
     ) -> None:
         child = context.block_view(self.mri)
 
         # make sure a matching trajectory program is installed on the pmac
-        if child.trajectoryProgVersion.value != TRAJECTORY_PROGRAM_NUM:
+        if child.trajectoryProgVersion.value < TRAJECTORY_PROGRAM_NUM:
             if child.trajectoryProgVersion.value >= FALLBACK_TRAJ_PROGRAM_NUM:
                 self.log.warning(
                     f"pmac trajectory program is version {FALLBACK_TRAJ_PROGRAM_NUM}"
@@ -160,7 +171,9 @@ class PmacTrajectoryPart(builtin.parts.ChildPart):
         )
         for axis in use_axes:
             demand = locals()[axis.lower()]
+            demand_vel = locals()[axis.lower() + "_vel"]
             attribute_values[f"positions{axis}"] = demand
+            attribute_values[f"velocities{axis}"] = demand_vel
         child.put_attribute_values(attribute_values)
         # Write the profile
         action()

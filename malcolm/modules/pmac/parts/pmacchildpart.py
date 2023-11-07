@@ -415,6 +415,7 @@ class PmacChildPart(builtin.parts.ChildPart):
         self.time_since_last_pvt = 0
         for info in self.axis_mapping.values():
             self.profile[info.cs_axis.lower()] = []
+            self.profile[info.cs_axis.lower() + "_vel"] = []
         self.calculate_generator_profile(completed_steps, do_run_up=True)
         self.write_profile_points(child, cs_port)
         # Wait for the motors to have got to the start
@@ -571,6 +572,7 @@ class PmacChildPart(builtin.parts.ChildPart):
 
         # generate the profile positions in a temporary list of dict:
         turnaround_profile = [{} for n in range(num_intervals)]
+        turnaround_velocity_profile = [{} for n in range(num_intervals)]
 
         # Do this for each axis' velocity and time arrays
         for axis_name, motor_info in self.axis_mapping.items():
@@ -585,6 +587,7 @@ class PmacChildPart(builtin.parts.ChildPart):
             # some of which align with the axis_times and some interleave.
             # We want to create a matching move profile of 'num_intervals'
             axis_pt = 1
+
             for i in range(num_intervals):
                 axis_velocity = axis_velocities[axis_pt]
                 axis_prev_velocity = axis_velocities[axis_pt - 1]
@@ -611,6 +614,7 @@ class PmacChildPart(builtin.parts.ChildPart):
 
                 position += part_position
                 turnaround_profile[i][axis_name] = position
+                turnaround_velocity_profile[i][axis_name] = prev_velocity
 
         user_program = self.get_user_program(PointType.TURNAROUND)
         for i in range(num_intervals):
@@ -620,10 +624,17 @@ class PmacChildPart(builtin.parts.ChildPart):
                 user_program,
                 completed_steps,
                 turnaround_profile[i],
+                turnaround_velocity_profile[i],
             )
 
     def add_profile_point(
-        self, time_point, velocity_mode, user_program, completed_step, axis_points
+        self,
+        time_point,
+        velocity_mode,
+        user_program,
+        completed_step,
+        axis_points,
+        velocity_points,
     ):
         # Add padding if the move time exceeds the max pmac move time
         if time_point > MAX_MOVE_TIME:
@@ -642,6 +653,11 @@ class PmacChildPart(builtin.parts.ChildPart):
                 per_section = float(v - last_point) / nsplit
                 for i in range(1, nsplit):
                     self.profile[cs_axis].append(last_point + i * per_section)
+            for k, v in velocity_points.items():
+                cs_axis = self.axis_mapping[k].cs_axis.lower()
+                for i in range(1, nsplit):
+                    self.profile[cs_axis + "_vel"].append(v)
+
             last_completed_step = self.completed_steps_lookup[-1]
             for _ in range(nsplit - 1):
                 self.completed_steps_lookup.append(last_completed_step)
@@ -653,11 +669,16 @@ class PmacChildPart(builtin.parts.ChildPart):
         self.profile["velocityMode"].append(velocity_mode)
         self.profile["userPrograms"].append(user_program)
         self.completed_steps_lookup.append(completed_step)
+        for k, v in velocity_points.items():
+            cs_axis_vel = self.axis_mapping[k].cs_axis.lower() + "_vel"
+            cs_axis = self.axis_mapping[k].cs_axis.lower()
+            if self.profile[cs_axis]:
+                self.profile[cs_axis_vel].append(v)
         for k, v in axis_points.items():
             cs_axis = self.axis_mapping[k].cs_axis.lower()
             self.profile[cs_axis].append(v)
 
-    def add_generator_point_pair(self, point, point_num, points_are_joined):
+    def add_generator_point_pair(self, point, point_num, points_are_joined, velocity):
         # Add position
         user_program = self.get_user_program(PointType.MID_POINT)
         self.add_profile_point(
@@ -666,6 +687,7 @@ class PmacChildPart(builtin.parts.ChildPart):
             user_program,
             point_num,
             {name: point.positions[name] for name in self.axis_mapping},
+            velocity,
         )
 
         # insert the lower bound of the next frame
@@ -675,13 +697,13 @@ class PmacChildPart(builtin.parts.ChildPart):
         else:
             user_program = self.get_user_program(PointType.END_OF_ROW)
             velocity_point = VelocityModes.REAL_PREV_TO_CURRENT
-
         self.add_profile_point(
             point.duration / 2.0,
             velocity_point,
             user_program,
             point_num + 1,
             {name: point.upper[name] for name in self.axis_mapping},
+            velocity,
         )
 
     def add_sparse_point(self, points, point_num, points_are_joined, same_velocities):
@@ -706,6 +728,16 @@ class PmacChildPart(builtin.parts.ChildPart):
         intentional.
         """
         profile_point_added = False
+
+        if points[point_num].duration:
+            velocities = {
+                name: (points[point_num].upper[name] - points[point_num].lower[name])
+                / points[point_num].duration
+                for name in self.axis_mapping
+            }
+        else:
+            velocities = {name: 0 for name in self.axis_mapping}
+
         if self.time_since_last_pvt > 0 and not points_are_joined:
             # assume we can skip if we are at the end of a row and we
             # just skipped the most recent point (i.e. time_since_last_pvt > 0)
@@ -726,6 +758,7 @@ class PmacChildPart(builtin.parts.ChildPart):
                 user_program,
                 point_num,
                 {name: point.positions[name] for name in self.axis_mapping},
+                velocities,
             )
             self.time_since_last_pvt = point.duration / 2.0
             profile_point_added = True
@@ -749,13 +782,13 @@ class PmacChildPart(builtin.parts.ChildPart):
                     velocity_point = VelocityModes.AVERAGE_PREV_TO_CURRENT
                 else:
                     velocity_point = VelocityModes.REAL_PREV_TO_CURRENT
-
             self.add_profile_point(
                 self.time_since_last_pvt,
                 velocity_point,
                 user_program,
                 point_num + 1,
                 {name: point.upper[name] for name in self.axis_mapping},
+                velocities,
             )
             self.time_since_last_pvt = 0
             profile_point_added = True
@@ -815,7 +848,17 @@ class PmacChildPart(builtin.parts.ChildPart):
             # when adding the turnaround.
             points_to_do = num_points - 1
             for i in range(points_to_do):
-                self.add_generator_point_pair(points[i], point_index, joined[i])
+                if points[i].duration:
+                    velocities = {
+                        name: (points[i].upper[name] - points[i].lower[name])
+                        / points[i].duration
+                        for name in self.axis_mapping
+                    }
+                else:
+                    velocities = {name: 0 for name in self.axis_mapping}
+                self.add_generator_point_pair(
+                    points[i], point_index, joined[i], velocities
+                )
 
                 # add in the turnaround between non-contiguous points
                 if not (joined[i]):
@@ -832,7 +875,9 @@ class PmacChildPart(builtin.parts.ChildPart):
             # Check for the last point
             if last_point_in_batch:
                 # Add the final generator point
-                self.add_generator_point_pair(points[-1], point_index, False)
+                self.add_generator_point_pair(
+                    points[-1], point_index, False, velocities
+                )
 
                 # Check if we have exceeded the profile points limit
                 if self.check_profile_length_exceeds_profile_points():
@@ -926,10 +971,12 @@ class PmacChildPart(builtin.parts.ChildPart):
             # Calculate how long to leave for the run-up (at least MIN_TIME)
             run_up_time = self.min_turnaround.interval
             axis_points = {}
+            velocity_points = {}
             for axis_name, velocity in point_velocities(
                 self.axis_mapping, point
             ).items():
                 axis_points[axis_name] = point.lower[axis_name]
+                velocity_points[axis_name] = velocity
                 motor_info = self.axis_mapping[axis_name]
                 run_up_time = max(
                     run_up_time, motor_info.acceleration_time(0, velocity)
@@ -943,6 +990,7 @@ class PmacChildPart(builtin.parts.ChildPart):
                 user_program,
                 start_index,
                 axis_points,
+                velocity_points,
             )
 
         self.time_since_last_pvt = 0
@@ -962,6 +1010,7 @@ class PmacChildPart(builtin.parts.ChildPart):
         # Calculate how long to leave for the tail-off
         # #(at least MIN_TIME)
         axis_points = {}
+        velocity_points = {}
         tail_off_time = self.min_turnaround.interval
         for axis_name, velocity in point_velocities(
             self.axis_mapping, point, entry=False
@@ -977,6 +1026,7 @@ class PmacChildPart(builtin.parts.ChildPart):
                 f"soft limits {motor_info.user_low_limit, motor_info.user_high_limit}"
             )
             axis_points[axis_name] = tail_off_pos
+            velocity_points[axis_name] = velocity
         # Do the last move
         user_program = self.get_user_program(PointType.TURNAROUND)
         self.add_profile_point(
@@ -985,6 +1035,7 @@ class PmacChildPart(builtin.parts.ChildPart):
             user_program,
             self.steps_up_to,
             axis_points,
+            velocity_points,
         )
         self.end_index = self.steps_up_to
         self.tail_off_added = True

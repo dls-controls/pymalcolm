@@ -125,6 +125,12 @@
     pv: $(pv_prefix):A:Positions
     config: False
 
+- ca.parts.CADoubleArrayPart:
+    name: velocitiesA
+    description: a list of positions for CoordSys axis A
+    pv: $(pv_prefix):A:Velocities
+    config: False
+
 - ca.parts.CAChoicePart:
     name: useB
     description: is this axis is used in the trajectory scan? yes/no
@@ -134,6 +140,12 @@
     name: positionsB
     description: a list of positions for CoordSys axis B
     pv: $(pv_prefix):B:Positions
+    config: False
+
+- ca.parts.CADoubleArrayPart:
+    name: velocitiesB
+    description: a list of positions for CoordSys axis B
+    pv: $(pv_prefix):B:Velocities
     config: False
 
 - ca.parts.CAChoicePart:
@@ -147,6 +159,12 @@
     pv: $(pv_prefix):C:Positions
     config: False
 
+- ca.parts.CADoubleArrayPart:
+    name: velocitiesC
+    description: a list of positions for CoordSys axis C
+    pv: $(pv_prefix):C:Velocities
+    config: False
+
 - ca.parts.CAChoicePart:
     name: useU
     description: is this axis is used in the trajectory scan? yes/no
@@ -156,6 +174,12 @@
     name: positionsU
     description: a list of positions for CoordSys axis U
     pv: $(pv_prefix):U:Positions
+    config: False
+
+- ca.parts.CADoubleArrayPart:
+    name: velocitiesU
+    description: a list of positions for CoordSys axis U
+    pv: $(pv_prefix):U:Velocities
     config: False
 
 - ca.parts.CAChoicePart:
@@ -169,6 +193,12 @@
     pv: $(pv_prefix):V:Positions
     config: False
 
+- ca.parts.CADoubleArrayPart:
+    name: velocitiesV
+    description: a list of positions for CoordSys axis V
+    pv: $(pv_prefix):V:Velocities
+    config: False
+
 - ca.parts.CAChoicePart:
     name: useW
     description: is this axis is used in the trajectory scan? yes/no
@@ -178,6 +208,12 @@
     name: positionsW
     description: a list of positions for CoordSys axis W
     pv: $(pv_prefix):W:Positions
+    config: False
+
+- ca.parts.CADoubleArrayPart:
+    name: velocitiesW
+    description: a list of positions for CoordSys axis W
+    pv: $(pv_prefix):W:Velocities
     config: False
 
 - ca.parts.CAChoicePart:
@@ -191,6 +227,12 @@
     pv: $(pv_prefix):X:Positions
     config: False
 
+- ca.parts.CADoubleArrayPart:
+    name: velocitiesX
+    description: a list of positions for CoordSys axis X
+    pv: $(pv_prefix):X:Velocities
+    config: False
+
 - ca.parts.CAChoicePart:
     name: useY
     description: is this axis is used in the trajectory scan? yes/no
@@ -202,6 +244,12 @@
     pv: $(pv_prefix):Y:Positions
     config: False
 
+- ca.parts.CADoubleArrayPart:
+    name: velocitiesY
+    description: a list of positions for CoordSys axis Y
+    pv: $(pv_prefix):Y:Velocities
+    config: False
+
 - ca.parts.CAChoicePart:
     name: useZ
     description: is this axis is used in the trajectory scan? yes/no
@@ -211,6 +259,12 @@
     name: positionsZ
     description: a list of positions for CoordSys axis Z
     pv: $(pv_prefix):Z:Positions
+    config: False
+
+- ca.parts.CADoubleArrayPart:
+    name: velocitiesZ
+    description: a list of positions for CoordSys axis Z
+    pv: $(pv_prefix):Z:Velocities
     config: False
 
 - ca.parts.CADoublePart:
