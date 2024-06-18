@@ -1,3 +1,5 @@
+import json
+import re
 import time
 from typing import Any, Dict, Sequence, Set, Tuple
 
@@ -6,6 +8,7 @@ from cothread.cosocket import socket
 
 from malcolm.core import Display, NumberMeta, Queue, TimeoutError, TimeStamp, Widget
 from malcolm.modules import builtin
+from malcolm.modules.builtin.util import LayoutTable
 
 from ..pandablocksclient import PandABlocksClient
 from ..parts.pandaactionpart import PandAActionPart
@@ -67,6 +70,8 @@ class PandAManagerController(builtin.controllers.ManagerController):
         self._child_controllers: Dict[str, PandABlockController] = {}
         # The PandABlock client that does the comms
         self._client = PandABlocksClient(hostname, port, Queue)
+        # The json layout stored in PandA
+        self._json_layout: Dict[str, Dict[str, float]] = {}
         # Filled in on reset
         self._stop_queue = None
         self._poll_spawned = None
@@ -267,6 +272,14 @@ class PandAManagerController(builtin.controllers.ManagerController):
         if block_name == "*METADATA":
             if field_name.startswith("LABEL_"):
                 field_name, block_name = field_name.split("_", 1)
+            elif field_name == "LAYOUT" and v:
+                # Set the layout table first so that related fields are set after
+                # possible deletion
+                self._json_layout = json.loads("".join(v))
+                if self.layout.value.name:
+                    # Only set the layout after the initial call to set_layout
+                    self.set_layout(LayoutTable([], [], [], [], []))
+                return
             else:
                 # Don't support any non-label metadata fields at the moment
                 return
@@ -297,3 +310,26 @@ class PandAManagerController(builtin.controllers.ManagerController):
             self.busses.handle_changes(bus_changes, ts)
         for block_name, block_changes_values in block_changes.items():
             self._child_controllers[block_name].handle_changes(block_changes_values, ts)
+
+    def set_layout(self, value):
+        if not value.name:
+            # Blank layout table means read from PandA provided json layout
+            # Called when PandA supplies a layout
+            x, y, visible = [], [], []
+            names = list(set(self.layout.value.name).union(self._json_layout))
+            for name in names:
+                visible.append(name in self._json_layout)
+                x.append(self._json_layout.get(name, {"x": 0.0})["x"])
+                y.append(self._json_layout.get(name, {"y": 0.0})["y"])
+            value = LayoutTable(names, names, x, y, visible)
+        super().set_layout(value)
+        old_json_layout = self._json_layout.copy()
+        for name, _, x, y, visible in self.layout.value.rows():
+            if visible:
+                self._json_layout[name] = dict(x=x, y=y)
+            else:
+                self._json_layout.pop(name, "")
+        if self._json_layout != old_json_layout:
+            # Custom encoding so the lines aren't too long and there aren't too many
+            lines = re.split(r'(?<=,) (?!"y")', json.dumps(self._json_layout))
+            self._client.set_table("*METADATA", "LAYOUT", lines)
