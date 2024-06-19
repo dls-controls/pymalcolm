@@ -3,6 +3,13 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_ after 2-1.
 
+`6.4`_ -
+-------------------
+Added:
+
+- Added functionality to send PandA Layout between Malcolm and PandA WebGui.
+
+
 `6.3`_ - 2024-03-15
 -------------------
 Fixed:
