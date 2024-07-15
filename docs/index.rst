@@ -83,7 +83,7 @@ should also work in any environment where pipenv is available.
 
 First download the source code::
 
-    $ git clone https://github.com/dls-controls/pymalcolm.git
+    $ git clone https://github.com/DiamondLightSource/pymalcolm.git
     $ cd pymalcolm
 
 To be able to use Malcolm run::
@@ -114,10 +114,10 @@ Which then gives you the entry point (assuming the venv is activated)::
 
 
 .. _repository:
-    https://github.com/dls-controls/pymalcolm
+    https://github.com/DiamondLightSource/pymalcolm
 
 .. _malcolmjs:
-    https://github.com/dls-controls/malcolmjs
+    https://github.com/DiamondLightSource/malcolmjs
 
 .. _Mapping project:
     https://indico.esss.lu.se/event/357/session/8/contribution/63

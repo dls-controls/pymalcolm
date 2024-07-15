@@ -481,7 +481,7 @@ kHz rates of scanning.
     https://www.python.org/dev/peps/pep-0020/
 
 .. _EPICS pmac:
-    https://github.com/dls-controls/pmac
+    https://github.com/DiamondLightSource/pmac
 
 .. _ADPandaBlocks:
     https://github.com/PandABlocks/ADPandABlocks

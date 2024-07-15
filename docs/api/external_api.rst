@@ -6,12 +6,12 @@ Some modules do not have external documentation, link them here.
 .. class:: Array
 
     Container for typed immutable array, defined in
-    https://github.com/dls-controls/annotypes/blob/master/annotypes/_array.py
+    https://github.com/DiamondLightSource/annotypes/blob/master/annotypes/_array.py
 
 .. class:: Anno
 
     Annotated type declaration, defined in
-    https://github.com/dls-controls/annotypes/blob/master/annotypes/_anno.py
+    https://github.com/DiamondLightSource/annotypes/blob/master/annotypes/_anno.py
 
 .. class:: List
 

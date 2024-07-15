@@ -8,7 +8,7 @@ involves big changes, please file a ticket before making a pull request! We
 want to make sure you don't spend your time coding something that might not fit
 the scope of the project.
 
-.. _dls_controls repository: https://github.com/dls-controls/pymalcolm/issues
+.. _dls_controls repository: https://github.com/DiamondLightSource/pymalcolm/issues
 
 Setup
 -----
@@ -18,7 +18,7 @@ The simplest way to set up the Python environment is with pipenv_.
 Then all you need to do is download the source code and create the environment
 with developer packages::
 
-    $ git clone git://github.com/dls-controls/pymalcolm.git
+    $ git clone git://github.com/DiamondLightSource/pymalcolm.git
     $ cd pymalcolm
     $ pipenv install --dev
 
